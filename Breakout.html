@@ -13,8 +13,9 @@
     const WIDTH = 500;
     const HEIGHT = 500;
     let score = 0;
-    let numOfTiles, tileList, lives, intervalVar; //list will hold tiles
+    let numOfTiles, tileList, lives, intervalVar, hitCount, running=false; //list will hold tiles
     ctx.font = '20px Calibri'; //seems like you need to redraw canvas to change font
+    ctx.fillText("Click me to start the game", 150, 250);
 
     //main object declaration
 
@@ -23,8 +24,8 @@
         y:0,
         radius: 5,
         color: 'blue',
-        spdX: -5,
-        spdY: -5
+        spdX: -3,
+        spdY: -3
     };
 
     let base = {
@@ -52,6 +53,15 @@
             base.pressingLeft = false;
             base.pressingRight = true;
         }
+    }
+    // KEY PRESSES
+
+    document.getElementById('ctx').onmousedown = function() {
+        if(running) {
+            running=false;
+            clearInterval(intervalVar);  
+        }
+        startGame();
     }
 
     document.onkeyup = function(event) {
@@ -104,12 +114,25 @@
         ball.x += ball.spdX;
         ball.y += ball.spdY;
         if (ball.x > WIDTH || ball.x < 0) {
+            hitCount += 1;
+            if(ball.spdX < 0) {
+                ball.spdX = -(Math.abs(ball.spdX) + 0.25);
+            }
+            if(ball.spdX > 0) {
+                ball.spdX = ball.spdX + 0.25;
+            }
             ball.spdX = -ball.spdX;
+            
         }
         if (ball.y < 0) {
+            hitCount++
+            if(ball.spdY < 0) {
+                ball.spdY = -(Math.abs(ball.spdY) + 1);
+            }
             ball.spdY = -ball.spdY;
         }
         if (ball.y > HEIGHT) {
+            hitCount++
             ball.spdY = -ball.spdY;
             base.lives -= 1;
         }
@@ -148,9 +171,9 @@
     }
 
     isGameOver = function () {
-        if (base.lives < 0) {
+        if (base.lives < 0 || score == 330) {
             clearInterval(intervalVar);
-            
+            ctx.fillText('Game Over! Click to restart.', 150, 250)
         }
     }
 
@@ -177,6 +200,10 @@
         }
         ctx.fillText("Score: " + score, 5, 490);
         ctx.fillText("Lives: " + base.lives, 430, 490);
+        ctx.fillText("Hitcount: " + hitCount, 5, 470);
+        ctx.fillText("SpeedY: " + ball.spdY, 5, 430);
+        ctx.fillText("SpeedX: " + ball.spdX, 5, 450);
+
         isGameOver();
         updateBasePosition();
         updateBallPosition();
@@ -191,7 +218,11 @@
         let tileY = 5;
         tileList = [];
         score = 0;
+        ball.spdX = -3;
+        ball.spdY = -3;
         base.lives = 3;
+        hitCount = 0;
+        running = true;
         for(var i=1; i<=6; i++) {
             for (var j =1; j<12; j++) {
                 tileList[numOfTiles] = {x:tileX, y:tileY};
@@ -204,7 +235,6 @@
         intervalVar = setInterval(update, 15);
     }
 
-    startGame();
     
     
     </script>
